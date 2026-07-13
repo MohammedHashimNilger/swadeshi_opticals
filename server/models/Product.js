@@ -14,16 +14,33 @@ const productSchema = new mongoose.Schema(
     images: [{ type: String }], // Cloudinary URLs
 
     specifications: {
-      frameSize: String,
-      frameMaterial: String,
-      lensType: String,
-      gender: { type: String, enum: ["Men", "Women", "Kids", "Unisex"], default: "Unisex" },
+      // ----- Common -----
       brand: String,
       color: String,
       weight: String,
       dimensions: String,
+
+      // ----- Frame specs (Sunglasses, Eyeglasses, Frames) -----
+      frameSize: String,
+      frameMaterial: String,
+      gender: { type: String, enum: ["Men", "Women", "Kids", "Unisex"], default: "Unisex" },
       shape: String,
+
+      // ----- Lens specs (Eyeglasses, Lenses) -----
+      lensType: String,
       lensColor: { type: String, default: "" },
+      coating: String,       // e.g. Anti-Glare, Anti-Scratch, Hydrophobic
+      index: String,         // e.g. 1.50, 1.56, 1.67, 1.74
+
+      // ----- Contact Lens specs -----
+      power: String,         // e.g. -2.50, +1.00, Plano
+      baseCurve: String,     // e.g. 8.6mm
+      diameter: String,      // e.g. 14.2mm
+      waterContent: String,  // e.g. 38%
+      wearingSchedule: String, // e.g. Daily, Monthly, Yearly
+
+      // ----- Accessory specs -----
+      accessoryType: String, // e.g. Case, Cleaning Cloth, Lens Cleaner, Chain, Repair Kit
     },
 
     stock: { type: Number, required: true, default: 0, min: 0 },

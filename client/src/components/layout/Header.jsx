@@ -21,7 +21,6 @@ const NAV_LINKS = [
   { label: "Lenses", to: "/shop/lenses" },
   { label: "Contact Lenses", to: "/shop/contact-lenses" },
   { label: "Accessories", to: "/shop/accessories" },
-  { label: "Offers", to: "/shop/offers" },
 ];
 
 export default function Header() {

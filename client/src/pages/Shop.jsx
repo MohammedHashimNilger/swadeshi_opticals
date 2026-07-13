@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
@@ -7,6 +7,7 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconMoodSad,
+  IconX,
 } from "@tabler/icons-react";
 import { fetchProducts } from "../services/productService";
 import ProductCard from "../components/product/ProductCard";
@@ -51,11 +52,6 @@ const CATEGORY_META = {
     description:
       "Browse lens options at Swadeshi Opticals. Prescription lenses, blue-cut, anti-glare, and photochromic lenses available in Chittorgarh, Rajasthan.",
   },
-  offers: {
-    title: "Offers & Deals",
-    description:
-      "Check out the latest offers and discounts on eyewear at Swadeshi Opticals. Save on eyeglasses, sunglasses, and contact lenses in Chittorgarh, Rajasthan.",
-  },
   kids: {
     title: "Kids Glasses",
     description:
@@ -71,6 +67,7 @@ function getCategoryMeta(categorySlug) {
 
 export default function Shop() {
   const { categorySlug } = useParams();
+  const pageRef = useRef(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [result, setResult] = useState({
     products: [],
@@ -86,12 +83,19 @@ export default function Shop() {
     ...(categorySlug ? { category: categorySlug } : {}),
   };
 
+  // Scroll to top immediately on mount before anything renders
+  useEffect(() => {
+    window.scroll(0, 0);
+  }, []);
+
   useEffect(() => {
     setLoading(true);
     fetchProducts(filters)
       .then(setResult)
       .catch((err) => console.error("Failed to load products:", err))
       .finally(() => setLoading(false));
+    // Scroll to the top on every category or filter change
+    window.scroll(0, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams.toString(), categorySlug]);
 
@@ -115,7 +119,7 @@ export default function Shop() {
     : `${SITE_URL}/shop`;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
+    <div ref={pageRef} className="mx-auto max-w-6xl px-4 py-10">
       <Helmet>
         <title>{formatPageTitle(pageTitle)}</title>
         <meta name="description" content={pageDescription} />
@@ -157,12 +161,26 @@ export default function Shop() {
       </div>
 
       <div className="mb-5 flex items-center justify-between rounded-xl border border-navy-100 px-3 py-2.5 dark:border-navy-700 md:hidden">
-        <button
-          className="flex items-center gap-1.5 text-xs font-medium text-navy-600 dark:text-navy-200"
-          onClick={() => setMobileFiltersOpen((prev) => !prev)}
-        >
-          <IconAdjustmentsHorizontal size={16} /> Filters
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            className="flex items-center gap-1.5 text-xs font-medium text-navy-600 dark:text-navy-200"
+            onClick={() => setMobileFiltersOpen(true)}
+          >
+            <IconAdjustmentsHorizontal size={16} /> Filters
+          </button>
+          {/* Show active filter count on mobile */}
+          {Object.entries(filters).filter(
+            ([k, v]) => !["category", "page", "sort"].includes(k) && v,
+          ).length > 0 && (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-navy-800 text-[10px] font-bold text-white dark:bg-navy-200 dark:text-navy-900">
+              {
+                Object.entries(filters).filter(
+                  ([k, v]) => !["category", "page", "sort"].includes(k) && v,
+                ).length
+              }
+            </span>
+          )}
+        </div>
         <SortDropdown
           value={filters.sort}
           onChange={(v) => updateFilter("sort", v)}
@@ -172,7 +190,13 @@ export default function Shop() {
       <div className="grid grid-cols-1 gap-10 md:grid-cols-[220px_1fr]">
         <div className={mobileFiltersOpen ? "block" : "hidden md:block"}>
           <div className="md:sticky md:top-24">
-            <FilterSidebar filters={filters} onChange={updateFilter} />
+            <FilterSidebar
+              filters={filters}
+              onChange={updateFilter}
+              category={categorySlug}
+              mobileOpen={mobileFiltersOpen}
+              onMobileClose={() => setMobileFiltersOpen(false)}
+            />
           </div>
         </div>
 

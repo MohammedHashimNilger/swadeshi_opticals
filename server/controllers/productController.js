@@ -55,7 +55,13 @@ export async function getProducts(req, res, next) {
         ? category
         : await Category.findOne({ slug: category }).then((c) => c?._id);
     }
-    if (gender) filter["specifications.gender"] = gender;
+    if (gender) {
+      if (gender === "Men" || gender === "Women") {
+        filter["specifications.gender"] = { $in: [gender, "Unisex"] };
+      } else {
+        filter["specifications.gender"] = gender;
+      }
+    }
     if (material) filter["specifications.frameMaterial"] = material;
     if (lensType) filter["specifications.lensType"] = lensType;
     if (shape) filter["specifications.shape"] = shape;
