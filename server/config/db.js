@@ -27,7 +27,18 @@ export async function connectDB() {
   }
 
   try {
-    cachedConnection = await mongoose.connect(process.env.MONGODB_URI);
+    // Create connection promise with timeout
+    const connectionPromise = mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 8000, // 8 second timeout
+      connectTimeoutMS: 8000,
+    });
+
+    // Add a 10-second timeout to prevent Vercel function timeout
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("MongoDB connection timeout")), 10000)
+    );
+
+    cachedConnection = await Promise.race([connectionPromise, timeoutPromise]);
     console.log(`MongoDB connected: ${cachedConnection.connection.host}`);
     return cachedConnection;
   } catch (err) {
