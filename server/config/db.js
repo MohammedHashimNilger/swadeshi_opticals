@@ -2,24 +2,14 @@ import mongoose from "mongoose";
 
 /**
  * Connects to MongoDB Atlas using the connection string in .env.
- * We cache the connection promise so repeated calls (which happen
- * naturally in a serverless environment, where this file may be
- * re-invoked on every request) don't open a new connection each time.
+ * In serverless environments, we check mongoose's internal connection
+ * state since module-level variables don't persist between invocations.
  */
-let cachedConnection = null;
-let connectionAttempted = false;
-
 export async function connectDB() {
-  if (cachedConnection) {
-    return cachedConnection;
+  // Check if mongoose is already connected
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
   }
-
-  // Prevent multiple simultaneous connection attempts
-  if (connectionAttempted) {
-    return cachedConnection;
-  }
-
-  connectionAttempted = true;
 
   if (!process.env.MONGODB_URI) {
     console.error("MONGODB_URI is not set in environment variables");
@@ -29,8 +19,9 @@ export async function connectDB() {
   try {
     // Create connection promise with timeout
     const connectionPromise = mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 8000, // 8 second timeout
+      serverSelectionTimeoutMS: 8000,
       connectTimeoutMS: 8000,
+      maxPoolSize: 10,
     });
 
     // Add a 10-second timeout to prevent Vercel function timeout
@@ -38,14 +29,11 @@ export async function connectDB() {
       setTimeout(() => reject(new Error("MongoDB connection timeout")), 10000)
     );
 
-    cachedConnection = await Promise.race([connectionPromise, timeoutPromise]);
-    console.log(`MongoDB connected: ${cachedConnection.connection.host}`);
-    return cachedConnection;
+    const connection = await Promise.race([connectionPromise, timeoutPromise]);
+    console.log(`MongoDB connected: ${connection.connection.host}`);
+    return connection;
   } catch (err) {
-    cachedConnection = null;
     console.error("MongoDB connection error:", err.message);
-    // Don't throw - allow serverless function to continue
-    // Routes will need to check if DB is available
     return null;
   }
 }
@@ -54,5 +42,5 @@ export async function connectDB() {
  * Check if database connection is available
  */
 export function isDBConnected() {
-  return cachedConnection !== null && cachedConnection.connection.readyState === 1;
+  return mongoose.connection.readyState === 1;
 }
