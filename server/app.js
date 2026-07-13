@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { sanitizeBody } from "./middleware/sanitize.js";
-import { connectDB } from "./config/db.js";
+import { connectDB, isDBConnected } from "./config/db.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -32,16 +32,24 @@ app.use(sanitizeBody);
 
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 
-app.use("/api/auth", authRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/categories", categoryRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/admin/prescriptions", prescriptionRoutes);
-app.use("/api/settings", settingsRoutes);
-app.use("/api/banners", bannerRoutes);
-app.use("/api/admin/customers", customerRoutes);
-app.use("/api/contact", contactRoutes);
+// Middleware to check DB connection for routes that need it
+const requireDB = (req, res, next) => {
+  if (!isDBConnected()) {
+    return res.status(503).json({ message: "Database connection unavailable. Please try again later." });
+  }
+  next();
+};
+
+app.use("/api/auth", requireDB, authRoutes);
+app.use("/api/admin", requireDB, adminRoutes);
+app.use("/api/categories", requireDB, categoryRoutes);
+app.use("/api/products", requireDB, productRoutes);
+app.use("/api/orders", requireDB, orderRoutes);
+app.use("/api/admin/prescriptions", requireDB, prescriptionRoutes);
+app.use("/api/settings", requireDB, settingsRoutes);
+app.use("/api/banners", requireDB, bannerRoutes);
+app.use("/api/admin/customers", requireDB, customerRoutes);
+app.use("/api/contact", requireDB, contactRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
