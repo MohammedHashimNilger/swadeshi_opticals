@@ -12,7 +12,8 @@ export async function getBanners(req, res, next) {
     }).sort("displayOrder");
     res.json(banners);
   } catch (err) {
-    next(err);
+    console.error("Banners fetch error:", err);
+    res.json([]); // Return empty array instead of 500
   }
 }
 

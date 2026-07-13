@@ -104,7 +104,8 @@ export async function getProducts(req, res, next) {
       totalPages: Math.ceil(total / PAGE_SIZE),
     });
   } catch (err) {
-    next(err);
+    console.error("Products fetch error:", err);
+    res.json({ products: [], total: 0, page: 1, totalPages: 0 });
   }
 }
 
