@@ -10,7 +10,7 @@ export default defineConfig({
       // Forwards /api/* to the local Express server during `npm run dev`.
       // In production, Vercel's rewrites (see vercel.json) do this job instead.
       "/api": {
-        target: import.meta.env.VITE_API_URL || "http://localhost:5000",
+        target: process.env.VITE_API_URL || "http://localhost:5000",
         changeOrigin: true,
       },
     },
