@@ -2,12 +2,21 @@ import Category from "../models/Category.js";
 
 // GET /api/categories — public, used to build nav + filter sidebar
 export async function getCategories(req, res, next) {
+  console.log("Controller START");
+
   try {
+    console.log("Before DB");
+
     const categories = await Category.find({ isActive: true }).sort("displayOrder");
+
+    console.log("After DB:", categories.length);
+
     res.json(categories);
+
+    console.log("Response Sent");
   } catch (err) {
-    console.error("Categories fetch error:", err);
-    res.json([]); // Return empty array instead of 500
+    console.error("Controller Error:", err);
+    next(err);
   }
 }
 
