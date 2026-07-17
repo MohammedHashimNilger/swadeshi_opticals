@@ -9,6 +9,7 @@ import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { CartProvider } from "./context/CartContext.jsx";
 import { AdminAuthProvider } from "./context/AdminAuthContext.jsx";
+import { ToastProvider } from "./context/ToastContext.jsx";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
@@ -21,7 +22,9 @@ createRoot(document.getElementById("root")).render(
             <AuthProvider>
               <CartProvider>
                 <AdminAuthProvider>
-                  <App />
+                  <ToastProvider>
+                    <App />
+                  </ToastProvider>
                 </AdminAuthProvider>
               </CartProvider>
             </AuthProvider>

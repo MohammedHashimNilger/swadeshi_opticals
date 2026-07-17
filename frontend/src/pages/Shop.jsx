@@ -116,6 +116,11 @@ export default function Shop() {
     setSearchParams(next);
   }
 
+  const hasActiveFilters =
+    Object.entries(filters).filter(
+      ([k, v]) => !["category", "page", "sort"].includes(k) && v,
+    ).length > 0;
+
   const categoryMeta = getCategoryMeta(categorySlug);
   const pageTitle = categoryMeta
     ? `Shop ${categoryMeta.title}`
@@ -229,14 +234,29 @@ export default function Shop() {
               ))}
             </div>
           ) : result.products.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
-              <IconMoodSad
-                size={32}
-                className="text-navy-200 dark:text-navy-700"
-              />
-              <p className="text-sm text-navy-400">
-                No products match these filters.
-              </p>
+            <div className="flex flex-col items-center justify-center gap-4 py-20 text-center animate-fadeIn">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-navy-50 dark:bg-navy-800">
+                <IconMoodSad
+                  size={32}
+                  className="text-navy-300 dark:text-navy-600"
+                />
+              </div>
+              <div>
+                <p className="text-base font-semibold text-navy-700 dark:text-navy-200">
+                  No products found
+                </p>
+                <p className="mt-1 text-sm text-navy-400">
+                  Try adjusting your filters or browse a different category.
+                </p>
+              </div>
+              {hasActiveFilters && (
+                <button
+                  onClick={clearAllFilters}
+                  className="btn-press rounded-lg bg-navy-800 px-5 py-2 text-sm font-medium text-white transition hover:bg-navy-700 dark:bg-navy-600 dark:hover:bg-navy-500"
+                >
+                  Clear all filters
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">

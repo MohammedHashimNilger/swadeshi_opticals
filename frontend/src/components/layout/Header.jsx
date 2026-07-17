@@ -153,7 +153,7 @@ export default function Header() {
           <button
             aria-label="Toggle dark mode"
             onClick={toggleTheme}
-            className="hover:text-navy-900 dark:hover:text-white"
+            className="btn-press hover:text-navy-900 dark:hover:text-white"
           >
             {isDark ? <IconSun size={20} /> : <IconMoon size={20} />}
           </button>
@@ -173,7 +173,7 @@ export default function Header() {
           {/* Mobile menu toggle */}
           <button
             aria-label="Open menu"
-            className="md:hidden"
+            className="btn-press md:hidden"
             onClick={() => setMobileOpen((prev) => !prev)}
           >
             {mobileOpen ? <IconX size={22} /> : <IconMenu2 size={22} />}
